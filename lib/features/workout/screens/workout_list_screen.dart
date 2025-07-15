@@ -37,13 +37,13 @@ class WorkoutListScreen extends StatelessWidget {
                 'Fullbody Workout',
                 'Today, 03:00pm',
                 true,
-                'assets/images/fullbody_workout.png',
+                'assets/images/FullBody.png',
               ),
               _upcomingWorkoutItem(
                 'Upperbody Workout',
                 'June 05, 02:00pm',
                 false,
-                'assets/images/upperbody_workout.png',
+                'assets/images/UpperBody.png',
               ),
 
               const Text(
@@ -56,20 +56,20 @@ class WorkoutListScreen extends StatelessWidget {
                 context,
                 'Fullbody Workout',
                 '11 Exercises • 32mins',
-                'assets/images/fullbody_workout.png',
+                'assets/images/FullBody.png',
               ),
 
               _trainItemCard(
                 context,
                 'Lowerbody Workout',
                 '12 Exercises • 40mins',
-                'assets/images/lowerbody_workout.png',
+                'assets/images/LowBody.png',
               ),
               _trainItemCard(
                 context,
                 'AB Workout',
                 '14 Exercises • 20mins',
-                'assets/images/ab_workout.png',
+                'assets/images/AbWorkout.png',
               ),
             ],
           ),

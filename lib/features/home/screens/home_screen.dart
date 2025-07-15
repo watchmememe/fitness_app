@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_app/features/notification/screens/notification_screen.dart';
 import 'package:fitness_app/features/profile/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -6,6 +8,27 @@ import 'package:intl/intl.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+  Future<double?> fetchAndCalculateBMI() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return null;
+
+    final doc =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final data = doc.data();
+
+    if (data == null ||
+        !data.containsKey('height') ||
+        !data.containsKey('weight')) {
+      return null;
+    }
+
+    final height = (data['height'] ?? 0).toDouble();
+    final weight = (data['weight'] ?? 0).toDouble();
+    if (height <= 0) return null;
+
+    final heightM = height / 100;
+    return weight / (heightM * heightM);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +51,24 @@ class HomeScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          Icons.notifications_none,
-                          color: Colors.black,
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const NotificationScreen(),
+                            ),
+                          );
+                        },
+                        child: const CircleAvatar(
+                          backgroundColor: Colors.white,
+                          child: Icon(
+                            Icons.notifications_none,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
+
                       GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -60,86 +94,103 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               // 📦 BMI Card (Figma-style with navigation)
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF87B9FF), Color(0xFFB28DFF)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Left side text + button
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'BMI (Body Mass Index)',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'You have a normal weight',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          const SizedBox(height: 16),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(context, '/bmi');
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30),
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFFD8A8FF),
-                                    Color(0xFFB28DFF),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
+              FutureBuilder<double?>(
+                future: fetchAndCalculateBMI(),
+                builder: (context, snapshot) {
+                  final bmi = snapshot.data;
+
+                  return Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF87B9FF), Color(0xFFB28DFF)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Left side text + button
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'BMI (Body Mass Index)',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontSize: 16,
                                 ),
                               ),
-                              child: const Text(
-                                'View More',
-                                style: TextStyle(color: Colors.white),
+                              const SizedBox(height: 8),
+                              Text(
+                                _getBMICategory(bmi),
+                                style: const TextStyle(color: Colors.white),
                               ),
-                            ),
+                              const SizedBox(height: 16),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.pushNamed(context, '/bmi');
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(30),
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xFFD8A8FF),
+                                        Color(0xFFB28DFF),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'View More',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-
-                    // Right side BMI Value Circle
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                      ),
-                      child: const Text(
-                        '20.1',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFFB28DFF),
                         ),
-                      ),
+
+                        // Right side BMI Value Circle
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                          ),
+                          child:
+                              snapshot.connectionState ==
+                                      ConnectionState.waiting
+                                  ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : Text(
+                                    bmi?.toStringAsFixed(1) ?? '--',
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFFB28DFF),
+                                    ),
+                                  ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
 
               const SizedBox(height: 20),
@@ -270,21 +321,21 @@ class HomeScreen extends StatelessWidget {
                 title: 'Fullbody Workout',
                 calories: '180 Calories Burn',
                 time: '20 minutes',
-                imagePath: 'assets/images/fullbody_workout.png',
+                imagePath: 'assets/images/FullBody.png',
                 progress: 0.4,
               ),
               _workoutItem(
                 title: 'Lowerbody Workout',
                 calories: '200 Calories Burn',
                 time: '30 minutes',
-                imagePath: 'assets/images/lowerbody_workout.png',
+                imagePath: 'assets/images/LowBody.png',
                 progress: 0.7,
               ),
               _workoutItem(
                 title: 'Ab Workout',
                 calories: '180 Calories Burn',
                 time: '20 minutes',
-                imagePath: 'assets/images/ab_workout.png',
+                imagePath: 'assets/images/AbWorkout.png',
                 progress: 0.3,
               ),
             ],
@@ -546,4 +597,12 @@ class DailyStatsCard extends StatelessWidget {
       ),
     );
   }
+}
+
+String _getBMICategory(double? bmi) {
+  if (bmi == null) return "Loading...";
+  if (bmi < 18.5) return "Underweight";
+  if (bmi < 25) return "Normal weight";
+  if (bmi < 30) return "Overweight";
+  return "Obese";
 }

@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/features/schedule/controllers/schedule_controller.dart';
 import 'package:fitness_app/features/schedule/models/schedule_model.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +43,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     });
   }
 
-  void _saveSchedule() {
+  void _saveSchedule() async {
     if (_titleController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter workout title')),
@@ -49,20 +51,32 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
       return;
     }
 
-    final newSchedule = ScheduleModel(
-      title: _titleController.text.trim(),
-      dateTime: _selectedDateTime,
-      difficulty: _selectedDifficulty,
-      id: '',
-    );
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('User not logged in')));
+      return;
+    }
 
-    ScheduleController.scheduleList.add(newSchedule);
+    try {
+      await FirebaseFirestore.instance.collection('schedules').add({
+        'title': _titleController.text.trim(),
+        'dateTime': _selectedDateTime,
+        'difficulty': _selectedDifficulty,
+        'isDone': false,
+        'userId': user.uid, // บันทึก uid ลง Firestore
+      });
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Workout scheduled!')));
-
-    Navigator.pop(context); // กลับไปหน้าหลัก
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Workout scheduled!')));
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to save: $e')));
+    }
   }
 
   @override

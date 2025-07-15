@@ -34,8 +34,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (uid == null) return;
 
     try {
-      final doc =
-          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get(const GetOptions(source: Source.server));
 
       if (doc.exists) {
         final data = doc.data()!;

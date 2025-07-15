@@ -1,3 +1,4 @@
+import 'package:fitness_app/features/workout/screens/workout_start_screen.dart';
 import 'package:flutter/material.dart';
 
 class WorkoutDetailScreen extends StatelessWidget {
@@ -73,26 +74,46 @@ class WorkoutDetailScreen extends StatelessWidget {
                     'Exercises',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  Text('3 Sets', style: TextStyle(color: Colors.grey)),
+                  Text('2 Sets', style: TextStyle(color: Colors.grey)),
                 ],
               ),
               const SizedBox(height: 12),
 
               _exerciseSetTitle('Set 1'),
-              _exerciseItem('Warm Up', '05:00', 'assets/images/ex1.jpg'),
-              _exerciseItem('Jumping Jack', '12x', 'assets/images/ex2.jpg'),
-              _exerciseItem('Skipping', '15x', 'assets/images/ex3.jpg'),
-              _exerciseItem('Squats', '20x', 'assets/images/ex4.jpg'),
-              _exerciseItem('Arm Raises', '00:53', 'assets/images/ex5.jpg'),
-              _exerciseItem('Rest and Drink', '02:00', 'assets/images/ex6.jpg'),
+              _exerciseItem('Warm Up', '05:00', 'assets/images/WarmUp.png'),
+              _exerciseItem(
+                'Jumping Jack',
+                '12x',
+                'assets/images/JumpingJack.png',
+              ),
+              _exerciseItem('Skipping', '15x', 'assets/images/Skipping.png'),
+              _exerciseItem('Squats', '20x', 'assets/images/Squats.png'),
+              _exerciseItem(
+                'Arm Raises',
+                '00:50',
+                'assets/images/ArmRaises.png',
+              ),
+              _exerciseItem(
+                'Rest and Drink',
+                '02:00',
+                'assets/images/RestandDrink.png',
+              ),
 
               const SizedBox(height: 16),
 
               _exerciseSetTitle('Set 2'),
-              _exerciseItem('Incline Push-Ups', '12x', 'assets/images/ex7.jpg'),
-              _exerciseItem('Push-Ups', '15x', 'assets/images/ex8.jpg'),
-              _exerciseItem('Skipping', '15x', 'assets/images/ex3.jpg'),
-              _exerciseItem('Cobra Stretch', '20x', 'assets/images/ex9.jpg'),
+              _exerciseItem(
+                'Incline Push-Ups',
+                '12x',
+                'assets/images/InclinePushUps.png',
+              ),
+              _exerciseItem('Push-Ups', '15x', 'assets/images/PushUps.png'),
+              _exerciseItem('Skipping', '15x', 'assets/images/Skipping.png'),
+              _exerciseItem(
+                'Cobra Stretch',
+                '20x',
+                'assets/images/CobraStretch.png',
+              ),
             ],
           ),
         ),
@@ -102,7 +123,68 @@ class WorkoutDetailScreen extends StatelessWidget {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(20),
         child: ElevatedButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (_) => WorkoutStartScreen(
+                      exercises: [
+                        {
+                          'name': 'Warm Up',
+                          'image': 'assets/images/WarmUp.png',
+                          'reps': '05:00',
+                        },
+                        {
+                          'name': 'Jumping Jack',
+                          'image': 'assets/images/JumpingJack.png',
+                          'reps': '12 reps',
+                        },
+                        {
+                          'name': 'Skipping',
+                          'image': 'assets/images/Skipping.png',
+                          'reps': '15 reps',
+                        },
+                        {
+                          'name': 'Squats',
+                          'image': 'assets/images/Squats.png',
+                          'reps': '20 reps',
+                        },
+                        {
+                          'name': 'Arm Raises',
+                          'image': 'assets/images/ArmRaises.png',
+                          'reps': '00:50',
+                        },
+                        {
+                          'name': 'Rest and Drink',
+                          'image': 'assets/images/RestandDrink.png',
+                          'reps': '02:00',
+                        },
+                        {
+                          'name': 'Incline Push-Ups',
+                          'image': 'assets/images/InclinePushUps.png',
+                          'reps': '12 reps',
+                        },
+                        {
+                          'name': 'Push-Ups',
+                          'image': 'assets/images/PushUps.png',
+                          'reps': '15 reps',
+                        },
+                        {
+                          'name': 'Skipping',
+                          'image': 'assets/images/Skipping.png',
+                          'reps': '15 reps',
+                        },
+                        {
+                          'name': 'Cobra Stretch',
+                          'image': 'assets/images/CobraStretch.png',
+                          'reps': '20 reps',
+                        },
+                      ],
+                    ),
+              ),
+            );
+          },
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
             backgroundColor: const Color(0xFF7FAAFF),

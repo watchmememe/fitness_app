@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fitness_app/features/schedule/models/schedule_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../controllers/schedule_controller.dart';
@@ -15,12 +17,22 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final schedules =
-        ScheduleController.scheduleList.where((schedule) {
-          return schedule.dateTime.year == selectedDate.year &&
-              schedule.dateTime.month == selectedDate.month &&
-              schedule.dateTime.day == selectedDate.day;
-        }).toList();
+    Stream<List<ScheduleModel>> getSchedulesForDate(DateTime date) {
+      final start = DateTime(date.year, date.month, date.day);
+      final end = start.add(const Duration(days: 1));
+
+      return FirebaseFirestore.instance
+          .collection('schedules')
+          .where('dateTime', isGreaterThanOrEqualTo: start)
+          .where('dateTime', isLessThan: end)
+          .snapshots()
+          .map(
+            (snapshot) =>
+                snapshot.docs
+                    .map((doc) => ScheduleModel.fromFirestore(doc))
+                    .toList(),
+          );
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
@@ -40,57 +52,62 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           _buildDateSelector(),
           const SizedBox(height: 12),
           Expanded(
-            child:
-                schedules.isEmpty
-                    ? const Center(child: Text('No workouts scheduled.'))
-                    : ListView.builder(
-                      itemCount: schedules.length,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemBuilder: (context, index) {
-                        final schedule = schedules[index];
-                        return Container(
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF4EDFF),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: StreamBuilder<List<ScheduleModel>>(
+              stream: getSchedulesForDate(selectedDate),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No workouts scheduled.'));
+                }
+
+                final schedules = snapshot.data!;
+                return ListView.builder(
+                  itemCount: schedules.length,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemBuilder: (context, index) {
+                    final schedule = schedules[index];
+                    return Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF4EDFF),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    schedule.title,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '${DateFormat('hh:mm a').format(schedule.dateTime)} • ${schedule.difficulty}',
-                                    style: const TextStyle(
-                                      color: Colors.black54,
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                schedule.title,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              Icon(
-                                schedule.isDone
-                                    ? Icons.check_circle
-                                    : Icons.radio_button_unchecked,
-                                color:
-                                    schedule.isDone
-                                        ? Colors.green
-                                        : Colors.grey,
+                              const SizedBox(height: 4),
+                              Text(
+                                '${DateFormat('hh:mm a').format(schedule.dateTime)} • ${schedule.difficulty}',
+                                style: const TextStyle(color: Colors.black54),
                               ),
                             ],
                           ),
-                        );
-                      },
-                    ),
+                          Icon(
+                            schedule.isDone
+                                ? Icons.check_circle
+                                : Icons.radio_button_unchecked,
+                            color: schedule.isDone ? Colors.green : Colors.grey,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),

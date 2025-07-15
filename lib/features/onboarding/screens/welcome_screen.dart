@@ -14,13 +14,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   final List<Map<String, String>> onboardingData = [
     {
-      'title': 'Track Your Workouts',
-      'desc': 'Keep a record of your fitness activities easily.',
+      'title': 'Track Your Goal',
+      'desc':
+          'Do not worry if you have trouble determining your goals, We can help you determine your goals and track your goals.',
       'image': 'assets/images/onboard1.jpg',
     },
     {
-      'title': 'Reach Your Goals',
-      'desc': 'Set goals and stay motivated every day.',
+      'title': 'Get Burn',
+      'desc':
+          'Let’s keep burning, to achive yours goals, it hurts only temporarily, if you give up now you will be in pain forever.',
       'image': 'assets/images/onboard3.jpg',
     },
   ];
